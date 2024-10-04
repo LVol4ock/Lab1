@@ -1,33 +1,19 @@
-/*
-
-The Game Project
-
-1 - Background Scenery
-
-Use p5 drawing functions such as rect, ellipse, line, triangle and
-point to draw the scenery as set out in the code comments. The items
-should appear next to the text titles.
-
-Each bit of scenery is worth two marks:
-
-0 marks = not a reasonable attempt
-1 mark = attempted but it's messy or lacks detail
-2 marks = you've used several shape functions to create the scenery
-
-I've given titles and chosen some base colours, but feel free to
-imaginatively modify these and interpret the scenery titles loosely to
-match your game theme.
-
-
-WARNING: Do not get too carried away. If you're shape takes more than 5 lines
-of code to draw then you've probably over done it.
-
-
-*/
+let speed = 0;
+let g = 0.5;
+let speedY = 0;
+let angle = 0;
+let char = 
+    {
+    posX: 250,
+    posY: 410,
+    speed: 0
+    }
+let acceleration = 0;
 
 function setup()
 {
 	createCanvas(1024, 576);
+
 }
 
 function draw()
@@ -39,7 +25,6 @@ function draw()
 	rect(0, 432, 1024, 144); //draw some green ground
 
 	//1. a cloud in the sky
-	//... add your code here
     
     stroke(255);
     strokeWeight(70);
@@ -47,9 +32,7 @@ function draw()
     circle(177, 65, 10);
     circle(220, 65, 10);
 
-
 	//2. a mountain in the distance
-	//... add your code here
     
     stroke(0);
     strokeWeight(0.3);
@@ -66,13 +49,9 @@ function draw()
         vertex(610, 200);
     endShape();
     
-    
     triangle(700, 296, 720, 270, 740, 310);
-    
-
 
 	//3. a tree
-	//... add your code here
     
     fill('#5C2C06');
     rect(850, 432, 20, -80);
@@ -91,7 +70,6 @@ function draw()
         vertex(840, 370);
         vertex(820, 328);
     endShape();
-
     
     stroke(0);
     fill('#B90000');
@@ -101,9 +79,6 @@ function draw()
     circle(830, 360, 10);
 
 	//4. a canyon
-	//NB. the canyon should go from ground-level to the bottom of the screen
-
-	//... add your code here
     
     fill('#5C2C06');
     beginShape();
@@ -116,6 +91,7 @@ function draw()
         vertex(80, 432);
     endShape();
     
+    strokeWeight(2);
     fill('#4A1C04');
     beginShape();
         vertex(100, 432);
@@ -128,10 +104,7 @@ function draw()
         vertex(100, 432);
     endShape();
 
-
-
 	//5. a collectable token - eg. a jewel, fruit, coins
-	//... add your code here
 
 	stroke(0);
     strokeWeight(0.5);
@@ -146,4 +119,82 @@ function draw()
     stroke("255")
     textSize(20);
     text("$", 416.5, 439);
+
+    //6. logic of rotating Red Ball
+
+    frameRate(60);
+    let slowmo = 2000;
+    let r = sqrt(char.posY**2 + char.posX **2);
+    let newX = 0 + r * cos(angle-asin(char.posY/r));
+    let newY = 20 - r * sin(angle-acos(char.posX/r));
+    rotate(angle);
+    angle = angle + speed / slowmo * 2 * PI;
+
+    //7. Red Ball
+
+    stroke('#44090a');
+    strokeWeight(2);
+    fill('#fc4b4c');
+    circle(newX, newY - 20, 60);
+    arc(newX + 25, newY - 22, 6, 8, PI * 4 / 10, PI * 14 / 10, OPEN);
+    fill('white');
+    arc(newX - 10, newY - 25, 12, 17, -PI / 10, PI * 12 / 10, CHORD);
+    arc(newX + 10, newY - 25, 12, 17, -2 * PI / 10, PI * 9 / 10, CHORD);
+    stroke('black');
+    arc(newX + 10, newY - 25, 2, 4, -2 * PI / 10, PI * 9 / 10, CHORD);
+    arc(newX - 10, newY - 25, 2, 4, -PI / 10, PI * 12 / 10, CHORD);
+    noFill();
+    stroke('#44090a');
+    arc(newX + 4, newY - 25, 38, 48, PI * 1 / 10, PI * 16 / 28);
+
+    //8. Walls of the level
+
+    if (char.posX < 20) {
+        char.posX = 20;
+        speed = 0;
+    } else if (char.posX > 1024 - 20) {
+        char.posX = 1024 - 20;
+        speed = 0;
+    }
+
+    //9. logic of smooth moving with acceleration
+
+    char.posX = char.posX + speed / 10;
+    if ((key == 'a' || key == 'A') && speed > -80 && keyIsPressed == true) {
+        if (char.posY == 410) speed = speed - acceleration;
+        acceleration = acceleration + 0.1;
+    } else if ((key == 'd' || key == 'D') && speed < 80 && keyIsPressed == true) {
+        speed = speed + acceleration;
+        acceleration = acceleration + 0.1;
+    } else {
+        acceleration = 0;
+        if (Math.abs(speed) < 1 && char.posY == 410) {
+        speed = speed * 0.2;
+        }
+        if (Math.abs(speed) < 0.001 && char.posY == 410) {
+        speed = 0;
+        } else if (speed < 0 && char.posY == 410) {
+                speed = speed + 2;
+            } else if (char.posY == 410) {
+                speed = speed - 2;
+            }
+    }
+
+    //10. jumping with gravitation
+
+    if (key == ' ' && char.posY == 410 && keyIsPressed == true) {
+        speedY = 10;
+        char.posY = char.posY - speedY;
+
+    } else {
+
+    }
+    if (char.posY < 410) {
+        speedY = speedY - g;
+        char.posY = char.posY - speedY;
+    }
+    if (char.posY > 411) {
+        char.posY = 410;
+    }
+
 }
